@@ -13,8 +13,8 @@ namespace everlaster {
         private Atom _person;
 		private Atom _coreControl;
 		private List<string> _animationStorableIds;
+		protected string _tmpFilePath;
 		protected string _lastBrowseDir;
-		protected string _tmpDir;
 
 		// TODO checkbox: configurable autoplay 
 
@@ -30,8 +30,8 @@ namespace everlaster {
 				SetAnimationStorableIds();
 
 				_coreControl = SuperController.singleton.GetAtomByUid("CoreControl");
-                _lastBrowseDir = CreateDirectory(SuperController.singleton.savesDir + @"mocap\");
-				_tmpDir = CreateDirectory(GetPluginPath() + @"tmp\");
+				_tmpFilePath = CreateDirectory("Custom\\" + @"Scripts\everlaster\tmp\") + "_MocapSwitcher.json";
+				_lastBrowseDir = CreateDirectory(SuperController.singleton.savesDir + @"mocap\");
 
 				CreateVersionInfoField();
 				CreateLoadMocapButton();
@@ -108,17 +108,6 @@ namespace everlaster {
 			return path;
 		}
 
-		// from FloatMultiParamRandomizer v1.0.7 (C) HSThrowaway5
-		string GetPluginPath()
-		{
-			SuperController.singleton.currentSaveDir = SuperController.singleton.currentLoadDir;
-			string pluginId = this.storeId.Split('_')[0];
-			string pathToScriptFile = this.manager.GetJSON(true, true)["plugins"][pluginId].Value;
-			string pathToScriptFolder = pathToScriptFile.Substring(0, pathToScriptFile.LastIndexOfAny(new char[] { '/', '\\' }) + 1);
-			pathToScriptFolder = pathToScriptFolder.Replace('/', '\\');
-			return pathToScriptFolder;
-		}
-
 		void CreateVersionInfoField()
 		{
 			JSONStorableString jsonString = new JSONStorableString("VersionInfo", "");
@@ -133,12 +122,12 @@ namespace everlaster {
 		{
 			JSONStorableString jsonString = new JSONStorableString("LoadButtonInfo", "");
 			UIDynamicTextField textField = CreateTextField(jsonString, false);
-			jsonString.val = "\nLoading a mocap erases any existing scene animation, but preserves other unsaved changes to the scene.";
+			jsonString.val = "\nLoading a mocap replaces any existing animation for this person atom.";
 			textField.UItext.fontSize = 28;
 			textField.UItext.alignment = TextAnchor.MiddleLeft;
-			textField.height = 100+28;
+			textField.height = 100;
 
-			var btn = CreateButton("Load mocap and reload scene");
+			var btn = CreateButton("Load mocap");
 			btn.button.onClick.AddListener(() =>
 			{
 				SuperController.singleton.NormalizeMediaPath(_lastBrowseDir); // Sets the path if it exists
@@ -161,7 +150,7 @@ namespace everlaster {
 		{
 			JSONClass scene = SuperController.singleton.GetSaveJSON();
 			ModifyAndTmpSaveScene(scene, mocap);
-            SuperController.singleton.Load(_tmpDir + "tmp.json");
+            SuperController.singleton.Load(_tmpFilePath);
 		}
 
 		void ModifyAndTmpSaveScene(JSONClass scene, JSONNode mocap)
@@ -180,7 +169,7 @@ namespace everlaster {
                 }
 			}
 
-			this.SaveJSON(scene, _tmpDir + "tmp.json");
+			this.SaveJSON(scene, _tmpFilePath);
 		}
 
 		void MergeMotionAnimationMasterData(JSONNode atomJson, JSONNode mocapJson)
@@ -237,7 +226,7 @@ namespace everlaster {
 				}
 				catch(Exception e)
 				{
-					SuperController.LogMessage($"DEBUG :: cannot clear {id} data, not found in scene");
+					//SuperController.LogMessage($"DEBUG :: cannot clear {id} data, not found in scene");
 				}
 			}
 		}
@@ -257,7 +246,7 @@ namespace everlaster {
 				}
 				catch(Exception e)
 				{
-					SuperController.LogMessage($"DEBUG :: cannot add {id} data, not found in mocap JSON");
+					//SuperController.LogMessage($"DEBUG :: cannot add {id} data, not found in mocap JSON");
 				}
 			}
 			return;
@@ -342,7 +331,6 @@ namespace everlaster {
 			JSONClass json = new JSONClass();
 			json["storables"] = new JSONArray();
 
-			// TODO offset motion capture steps by root position when loaded or saved
             JSONStorable control = _person.GetStorableByID("control");
 			json["storables"].Add(control.GetJSON());
 
