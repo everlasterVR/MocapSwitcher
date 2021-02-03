@@ -3,6 +3,7 @@ using System;
 using UnityEngine;
 using System.Collections.Generic;
 using SimpleJSON;
+using MVR.FileManagementSecure;
 
 namespace everlaster {
     public class MocapSwitcher : MVRScript {
@@ -13,8 +14,10 @@ namespace everlaster {
         private Atom person;
         private Atom coreControl;
         private List<string> animationStorableIds;
-        protected string tmpFilePath;
-        protected string lastBrowseDir;
+        private string pluginDataDir = SuperController.singleton.savesDir + @"PluginData\everlaster\MocapSwitcher\";
+        private string mocapDir = SuperController.singleton.savesDir + @"mocap\";
+        private string tmpSceneFilePath;
+        private string lastBrowseDir;
 
         public override void Init() {
             try {
@@ -24,12 +27,14 @@ namespace everlaster {
                     return;
                 }
 
-                person = containingAtom;
-                SetAnimationStorableIds();
+                FileManagerSecure.CreateDirectory(pluginDataDir);
+                FileManagerSecure.CreateDirectory(mocapDir);
+                tmpSceneFilePath = pluginDataDir + "tmp.json";
+                lastBrowseDir = mocapDir;
 
+                person = containingAtom;
                 coreControl = SuperController.singleton.GetAtomByUid("CoreControl");
-                tmpFilePath = CreateDirectory("Custom\\" + @"Scripts\everlaster\tmp\") + "_MocapSwitcher.json";
-                lastBrowseDir = CreateDirectory(SuperController.singleton.savesDir + @"mocap\");
+                SetAnimationStorableIds();
 
                 InitPluginUILeft();
             }
@@ -50,22 +55,9 @@ namespace everlaster {
             }
         }
 
-        // from FloatMultiParamRandomizer v1.0.7 (C) HSThrowaway5
         string CreateDirectory(string path)
         {
-            JSONNode node = new JSONNode();
-            if(!path.EndsWith("/") && !path.EndsWith(@"\"))
-            {
-                path += @"\";
-            }
-
-            try
-            {
-                node.SaveToFile(path);
-            }
-            catch (Exception e)
-            {
-            }
+            FileManagerSecure.CreateDirectory(path);
             return path;
         }
 
@@ -138,7 +130,7 @@ namespace everlaster {
         {
             JSONClass scene = SuperController.singleton.GetSaveJSON();
             ModifyAndTmpSaveScene(scene, mocap);
-            SuperController.singleton.Load(tmpFilePath);
+            SuperController.singleton.Load(tmpSceneFilePath);
         }
 
         void ModifyAndTmpSaveScene(JSONClass scene, JSONNode mocap)
@@ -157,7 +149,7 @@ namespace everlaster {
                 }
             }
 
-            SaveJSON(scene, tmpFilePath);
+            SaveJSON(scene, tmpSceneFilePath);
         }
 
         void MergeMotionAnimationMasterData(JSONNode atomJson, JSONNode mocapJson)
