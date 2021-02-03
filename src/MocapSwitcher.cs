@@ -8,8 +8,7 @@ using MVR.FileManagementSecure;
 namespace everlaster {
     public class MocapSwitcher : MVRScript {
         const string pluginName = "MocapSwitcher";
-        const string pluginVersion = "1.0";
-        const string saveExt = "mocap";
+        const string pluginVersion = "1.0.1";
 
         private Atom person;
         private Atom coreControl;
@@ -18,6 +17,7 @@ namespace everlaster {
         private string mocapDir = SuperController.singleton.savesDir + @"mocap\";
         private string tmpSceneFilePath;
         private string lastBrowseDir;
+        const string saveExt = "json";
 
         public override void Init() {
             try {
