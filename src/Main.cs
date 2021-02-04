@@ -1,14 +1,16 @@
 ﻿//#define SHOW_DEBUG
-using System;
-using UnityEngine;
-using System.Collections.Generic;
-using SimpleJSON;
 using MVR.FileManagementSecure;
+using SimpleJSON;
+using System;
+using System.Collections.Generic;
+using UnityEngine;
 
-namespace everlaster {
-    public class MocapSwitcher : MVRScript {
-        const string pluginName = "MocapSwitcher";
-        const string pluginVersion = "1.0.1";
+namespace MocapSwitcher
+{
+    public class Main : MVRScript
+    {
+        private const string pluginName = "MocapSwitcher";
+        private const string pluginVersion = "1.0.1";
 
         private Atom person;
         private Atom coreControl;
@@ -17,10 +19,12 @@ namespace everlaster {
         private string mocapDir = SuperController.singleton.savesDir + @"mocap\";
         private string tmpSceneFilePath;
         private string lastBrowseDir;
-        const string saveExt = "json";
+        private const string saveExt = "json";
 
-        public override void Init() {
-            try {
+        public override void Init()
+        {
+            try
+            {
                 if(containingAtom.type != "Person")
                 {
                     Log.Error($"Plugin is for use with 'Person' atom, not '{containingAtom.type}'");
@@ -38,12 +42,13 @@ namespace everlaster {
 
                 InitPluginUILeft();
             }
-            catch (Exception e) {
+            catch(Exception e)
+            {
                 SuperController.LogError("Exception caught: " + e);
             }
         }
 
-        void SetAnimationStorableIds()
+        private void SetAnimationStorableIds()
         {
             animationStorableIds = new List<string>();
             foreach(string id in person.GetStorableIDs())
@@ -55,26 +60,26 @@ namespace everlaster {
             }
         }
 
-        string CreateDirectory(string path)
+        private string CreateDirectory(string path)
         {
             FileManagerSecure.CreateDirectory(path);
             return path;
         }
 
-        void InitPluginUILeft()
+        private void InitPluginUILeft()
         {
             JSONStorableString titleUIText = new JSONStorableString("titleText", "");
             UIDynamicTextField titleUITextField = CreateTextField(titleUIText);
             titleUITextField.UItext.fontSize = 36;
             titleUITextField.height = 100;
-            titleUIText.SetVal($"{nameof(MocapSwitcher)}\n<size=28>v{pluginVersion}</size>");
+            titleUIText.SetVal($"{nameof(Main)}\n<size=28>v{pluginVersion}</size>");
 
             CreateLoadMocapButton();
             CreateSaveMocapButton();
         }
 
         // based on FloatMultiParamRandomizer v1.0.7 (C) HSThrowaway5
-        void CreateLoadMocapButton()
+        private void CreateLoadMocapButton()
         {
             JSONStorableString jsonString = new JSONStorableString("LoadButtonInfo", "");
             UIDynamicTextField textField = CreateTextField(jsonString, false);
@@ -92,7 +97,7 @@ namespace everlaster {
         }
 
         // based on FloatMultiParamRandomizer v1.0.7 (C) HSThrowaway5
-        void CreateSaveMocapButton()
+        private void CreateSaveMocapButton()
         {
             JSONStorableString jsonString = new JSONStorableString("SaveButtonInfo", "");
             UIDynamicTextField textField = CreateTextField(jsonString, false);
@@ -116,7 +121,7 @@ namespace everlaster {
         }
 
         // based on FloatMultiParamRandomizer v1.0.7 (C) HSThrowaway5
-        void HandleLoadMocap(string path)
+        private void HandleLoadMocap(string path)
         {
             if(string.IsNullOrEmpty(path))
             {
@@ -126,14 +131,14 @@ namespace everlaster {
             LoadSaveJson(LoadJSON(path));
         }
 
-        void LoadSaveJson(JSONNode mocap)
+        private void LoadSaveJson(JSONNode mocap)
         {
             JSONClass scene = SuperController.singleton.GetSaveJSON();
             ModifyAndTmpSaveScene(scene, mocap);
             SuperController.singleton.Load(tmpSceneFilePath);
         }
 
-        void ModifyAndTmpSaveScene(JSONClass scene, JSONNode mocap)
+        private void ModifyAndTmpSaveScene(JSONClass scene, JSONNode mocap)
         {
             foreach(JSONNode atomJson in scene["atoms"].AsArray)
             {
@@ -152,7 +157,7 @@ namespace everlaster {
             SaveJSON(scene, tmpSceneFilePath);
         }
 
-        void MergeMotionAnimationMasterData(JSONNode atomJson, JSONNode mocapJson)
+        private void MergeMotionAnimationMasterData(JSONNode atomJson, JSONNode mocapJson)
         {
             try
             {
@@ -179,7 +184,7 @@ namespace everlaster {
             return;
         }
 
-        JSONNode FindMotionAnimationMasterData(JSONNode coreControl)
+        private JSONNode FindMotionAnimationMasterData(JSONNode coreControl)
         {
             foreach(JSONNode storable in coreControl["storables"].AsArray)
             {
@@ -191,7 +196,7 @@ namespace everlaster {
             throw new Exception("Selected mocap file does not contain MotionAnimationMaster data!");
         }
 
-        void ClearPersonPoseAndAnimationData(JSONNode atomJson)
+        private void ClearPersonPoseAndAnimationData(JSONNode atomJson)
         {
             foreach(string id in animationStorableIds)
             {
@@ -213,7 +218,7 @@ namespace everlaster {
             }
         }
 
-        void AddPersonPoseAndAnimationData(JSONNode atomJson, JSONNode mocapJson)
+        private void AddPersonPoseAndAnimationData(JSONNode atomJson, JSONNode mocapJson)
         {
             foreach(string id in animationStorableIds)
             {
@@ -236,7 +241,7 @@ namespace everlaster {
             return;
         }
 
-        JSONNode FindStorableFromPerson(JSONNode personData, string id)
+        private JSONNode FindStorableFromPerson(JSONNode personData, string id)
         {
             foreach(JSONNode storable in personData["storables"].AsArray)
             {
@@ -249,7 +254,7 @@ namespace everlaster {
         }
 
         // based on FloatMultiParamRandomizer v1.0.7 (C) HSThrowaway5
-        void HandleSaveMocap(string path)
+        private void HandleSaveMocap(string path)
         {
             if(String.IsNullOrEmpty(path))
             {
@@ -266,7 +271,7 @@ namespace everlaster {
             SuperController.singleton.DoSaveScreenshot(path);
         }
 
-        JSONClass GetSaveJson()
+        private JSONClass GetSaveJson()
         {
             JSONClass json = new JSONClass();
             json["CoreControl"] = GetCoreControlJson();
@@ -274,7 +279,7 @@ namespace everlaster {
             return json;
         }
 
-        JSONClass GetCoreControlJson()
+        private JSONClass GetCoreControlJson()
         {
             JSONClass json = new JSONClass();
             json["storables"] = new JSONArray();
@@ -286,7 +291,7 @@ namespace everlaster {
             return json;
         }
 
-        JSONClass GetPersonJson()
+        private JSONClass GetPersonJson()
         {
             JSONClass json = new JSONClass();
             json["storables"] = new JSONArray();
@@ -330,7 +335,7 @@ namespace everlaster {
         //}
 
         // some animation storables have "Control" in them, others don't
-        string animationStorableIdToControlId(string id)
+        private string animationStorableIdToControlId(string id)
         {
             switch(id)
             {
@@ -338,6 +343,7 @@ namespace everlaster {
                 case "lNippleControlAnimation":
                 case "rNippleControlAnimation":
                     return id.Replace("Animation", "");
+
                 default:
                     return id.Replace("Animation", "Control");
             }

@@ -7,7 +7,7 @@
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <LangVersion>6</LangVersion>
-    <ProjectGuid>{99A6E453-DE7C-4861-8993-72245E0801F0}</ProjectGuid>
+    <ProjectGuid>{EBBA93FE-33E6-48F5-B493-214FF83791BD}</ProjectGuid>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Platform)' == 'Unity' ">
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
@@ -83,7 +83,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="MocapSwitcher.cslist" />
-    <Compile Include="src\MocapSwitcher.cs" />
+    <Compile Include="src\Main.cs" />
     <Compile Include="src\Utils\Log.cs" />
   </ItemGroup>
   <ItemGroup>
