@@ -13,15 +13,24 @@ if [ -z "$package_version" ]; then
 	exit 1
 fi
 
+# Setup archive contents
 resource_dir=publish/Custom/Scripts/everlaster/$resource_name/
 mkdir -p $resource_dir
 cp *.cslist $resource_dir
 cp -r src/ $resource_dir
-cp meta.json publish/
 
+# Update version info in meta.json
+cp meta.json publish/
 sed -i "s/v0.0.0/$resource_version/" publish/meta.json
 
 cd publish
+
+# hide .cs files (plugin is loaded with .cslist)
+for file in $(find . -type f -name "*.cs"); do
+    touch $file.hide
+done
+
+# Zip files to .var and cleanup
 package="everlaster.$resource_name.$package_version.var"
 zip -r $package *
 cd ..
