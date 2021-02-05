@@ -82,14 +82,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="MocapSwitcher.cslist" />
-    <Compile Include="src\Main.cs" />
+    <Compile Include="src\Script.cs" />
     <Compile Include="src\Utils\Log.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="MocapSwitcher.cslist" />
     <None Include=".gitignore" />
     <None Include="meta.json" />
-    <None Include="package.sh" />
     <None Include="README.md" />
     <None Include="todo.md" />
   </ItemGroup>

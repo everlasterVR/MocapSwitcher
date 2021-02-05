@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace MocapSwitcher
 {
-    public class Main : MVRScript
+    public class Script : MVRScript
     {
         private const string pluginName = "MocapSwitcher";
         private const string pluginVersion = "1.0.1";
@@ -72,7 +72,7 @@ namespace MocapSwitcher
             UIDynamicTextField titleUITextField = CreateTextField(titleUIText);
             titleUITextField.UItext.fontSize = 36;
             titleUITextField.height = 100;
-            titleUIText.SetVal($"{nameof(Main)}\n<size=28>v{pluginVersion}</size>");
+            titleUIText.SetVal($"{nameof(MocapSwitcher)}\n<size=28>v{pluginVersion}</size>");
 
             CreateLoadMocapButton();
             CreateSaveMocapButton();

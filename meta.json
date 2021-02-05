@@ -4,7 +4,7 @@
    "packageName" : "MocapSwitcher", 
    "standardReferenceVersionOption" : "Latest", 
    "scriptReferenceVersionOption" : "Exact", 
-   "description" : "v0.0.0. Export mocap animation from a Person atom into a file.\nImport animation to a Person atom from a mocap file.", 
+   "description" : "v<Version>. Export mocap animation from a Person atom into a file.\nImport animation to a Person atom from a mocap file.", 
    "credits" : "", 
    "instructions" : "Load MocapSwitcher.cslist to a Person atom.", 
    "promotionalLink" : "", 
