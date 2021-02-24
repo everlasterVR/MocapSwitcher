@@ -44,7 +44,7 @@ namespace MocapSwitcher
             }
             catch(Exception e)
             {
-                SuperController.LogError("Exception caught: " + e);
+                Log.Error($"{e}");
             }
         }
 
@@ -58,12 +58,6 @@ namespace MocapSwitcher
                     animationStorableIds.Add(id);
                 }
             }
-        }
-
-        private string CreateDirectory(string path)
-        {
-            FileManagerSecure.CreateDirectory(path);
-            return path;
         }
 
         private void InitPluginUILeft()
@@ -115,7 +109,7 @@ namespace MocapSwitcher
                 // Update the browser to be a Save browser
                 uFileBrowser.FileBrowser browser = SuperController.singleton.mediaFileBrowserUI;
                 browser.SetTextEntry(true);
-                browser.fileEntryField.text = String.Format("{0}.{1}", ((int) (DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds).ToString(), saveExt);
+                browser.fileEntryField.text = string.Format("{0}.{1}", ((int) (DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds).ToString(), saveExt);
                 browser.ActivateFileNameField();
             });
         }
@@ -178,7 +172,7 @@ namespace MocapSwitcher
             }
             catch(Exception e)
             {
-                Log.Error("Exception caught: " + e);
+                Log.Error($"{e}");
             }
             return;
         }
@@ -255,7 +249,7 @@ namespace MocapSwitcher
         // based on FloatMultiParamRandomizer v1.0.7 (C) HSThrowaway5
         private void HandleSaveMocap(string path)
         {
-            if(String.IsNullOrEmpty(path))
+            if(string.IsNullOrEmpty(path))
             {
                 return;
             }
@@ -272,28 +266,31 @@ namespace MocapSwitcher
 
         private JSONClass GetSaveJson()
         {
-            JSONClass json = new JSONClass();
-            json["CoreControl"] = GetCoreControlJson();
-            json["Person"] = GetPersonJson();
-            return json;
+            return new JSONClass
+            {
+                ["CoreControl"] = GetCoreControlJson(),
+                ["Person"] = GetPersonJson()
+            };
         }
 
         private JSONClass GetCoreControlJson()
         {
-            JSONClass json = new JSONClass();
-            json["storables"] = new JSONArray();
-
             JSONStorable motionAnimationMaster = coreControl.GetStorableByID("MotionAnimationMaster");
             JSONClass storable = motionAnimationMaster.GetJSON();
             storable["triggers"] = new JSONArray(); // prevents triggers from scene from carrying over to mocap json
-            json["storables"].Add(storable);
-            return json;
+
+            return new JSONClass
+            {
+                ["storables"] = new JSONArray { storable }
+            };
         }
 
         private JSONClass GetPersonJson()
         {
-            JSONClass json = new JSONClass();
-            json["storables"] = new JSONArray();
+            JSONClass json = new JSONClass
+            {
+                ["storables"] = new JSONArray()
+            };
 
             JSONStorable control = person.GetStorableByID("control");
             json["storables"].Add(control.GetJSON());
