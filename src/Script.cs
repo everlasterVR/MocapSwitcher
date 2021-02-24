@@ -36,6 +36,7 @@ namespace MocapSwitcher
                 SetAnimationStorableIds();
 
                 InitPluginUILeft();
+                InitPluginUIRight();
             }
             catch(Exception e)
             {
@@ -70,14 +71,8 @@ namespace MocapSwitcher
         // based on FloatMultiParamRandomizer v1.0.7 (C) HSThrowaway5
         private void CreateLoadMocapButton()
         {
-            JSONStorableString jsonString = new JSONStorableString("LoadButtonInfo", "");
-            UIDynamicTextField textField = CreateTextField(jsonString, false);
-            jsonString.val = "\nLoading a mocap replaces any existing animation for this person atom.";
-            textField.UItext.fontSize = 28;
-            textField.UItext.alignment = TextAnchor.MiddleLeft;
-            textField.height = 100;
-
             UIDynamicButton btn = CreateButton("Load mocap");
+            btn.height = 100f;
             btn.button.onClick.AddListener(() =>
             {
                 SuperController.singleton.NormalizeMediaPath(lastBrowseDir); // Sets lastMediaDir if path it exists
@@ -88,14 +83,8 @@ namespace MocapSwitcher
         // based on FloatMultiParamRandomizer v1.0.7 (C) HSThrowaway5
         private void CreateSaveMocapButton()
         {
-            JSONStorableString jsonString = new JSONStorableString("SaveButtonInfo", "");
-            UIDynamicTextField textField = CreateTextField(jsonString, false);
-            jsonString.val = "\nPosition the scene animation to the beginning before exporting.";
-            textField.height = 100;
-            textField.UItext.alignment = TextAnchor.MiddleLeft;
-            textField.UItext.fontSize = 28;
-
-            UIDynamicButton btn = CreateButton("Export mocap");
+            UIDynamicButton btn = CreateButton("Save mocap");
+            btn.height = 100f;
             btn.button.onClick.AddListener(() =>
             {
                 SuperController.singleton.motionAnimationMaster.ResetAnimation();
@@ -108,6 +97,25 @@ namespace MocapSwitcher
                 browser.fileEntryField.text = string.Format("{0}.{1}", ((int) (DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds).ToString(), saveExt);
                 browser.ActivateFileNameField();
             });
+        }
+
+        private void InitPluginUIRight()
+        {
+            CreateNewSpacer(100, true);
+
+            JSONStorableString jsonString = new JSONStorableString("LoadButtonInfo", "");
+            UIDynamicTextField textField = CreateTextField(jsonString, true);
+            jsonString.val = "Loading replaces any existing animation for this person atom.\n\n" +
+                "Saving resets playback to ensure the starting pose is correct in the saved mocap.";
+            textField.UItext.fontSize = 28;
+            textField.UItext.alignment = TextAnchor.MiddleLeft;
+            textField.height = 215;
+        }
+
+        void CreateNewSpacer(float height, bool rightSide = false)
+        {
+            UIDynamic spacer = CreateSpacer(rightSide);
+            spacer.height = height;
         }
 
         private void HandleLoadMocap(string path)
