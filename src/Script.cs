@@ -98,6 +98,7 @@ namespace MocapSwitcher
             UIDynamicButton btn = CreateButton("Export mocap");
             btn.button.onClick.AddListener(() =>
             {
+                SuperController.singleton.motionAnimationMaster.ResetAnimation();
                 SuperController.singleton.NormalizeMediaPath(lastBrowseDir); // Sets lastMediaDir if path exists
                 SuperController.singleton.GetMediaPathDialog(HandleSaveMocap, saveExt);
 
@@ -136,10 +137,9 @@ namespace MocapSwitcher
             JSONClass motionAnimationMasterJson = FindMotionAnimationMasterData(coreControlJson);
             try
             {
-                MotionAnimationMaster master = SuperController.singleton.motionAnimationMaster;
                 motionAnimationMasterJson["playbackCounter"] = "0";
                 motionAnimationMasterJson["startTimeStemp"] = "0";
-                master.RestoreFromJSON(motionAnimationMasterJson);
+                SuperController.singleton.motionAnimationMaster.RestoreFromJSON(motionAnimationMasterJson);
             }
             catch(Exception e)
             {
@@ -227,24 +227,21 @@ namespace MocapSwitcher
             {
                 path += "." + saveExt;
             }
-            JSONClass saveJson = GetSaveJson();
-            this.SaveJSON(saveJson, path);
-            SuperController.singleton.DoSaveScreenshot(path);
-        }
 
-        private JSONClass GetSaveJson()
-        {
-            return new JSONClass
-            {
-                ["CoreControl"] = GetCoreControlJson(),
-                ["Person"] = GetPersonJson()
-            };
+            SaveJSON(
+                new JSONClass
+                {
+                    ["CoreControl"] = GetCoreControlJson(),
+                    ["Person"] = GetPersonJson()
+                },
+                path
+            );
+            SuperController.singleton.DoSaveScreenshot(path);
         }
 
         private JSONClass GetCoreControlJson()
         {
-            JSONStorable motionAnimationMaster = coreControl.GetStorableByID("MotionAnimationMaster");
-            JSONClass storable = motionAnimationMaster.GetJSON();
+            JSONClass storable = SuperController.singleton.motionAnimationMaster.GetJSON();
             storable["triggers"] = new JSONArray(); // prevents triggers from scene from carrying over to mocap json
 
             return new JSONClass
