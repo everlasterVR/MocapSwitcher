@@ -10,7 +10,7 @@ namespace MocapSwitcher
     public class Script : MVRScript
     {
         private const string pluginName = "MocapSwitcher";
-        private const string pluginVersion = "1.0.1";
+        private const string pluginVersion = "<Version>";
 
         private Atom person;
         private Atom coreControl;
@@ -109,7 +109,7 @@ namespace MocapSwitcher
             UIDynamicButton btn = CreateButton("Export mocap");
             btn.button.onClick.AddListener(() =>
             {
-                SuperController.singleton.NormalizeMediaPath(lastBrowseDir); // Sets lastMediaDir if path it exists
+                SuperController.singleton.NormalizeMediaPath(lastBrowseDir); // Sets lastMediaDir if path exists
                 SuperController.singleton.GetMediaPathDialog(HandleSaveMocap, saveExt);
 
                 // Update the browser to be a Save browser
@@ -120,7 +120,6 @@ namespace MocapSwitcher
             });
         }
 
-        // based on FloatMultiParamRandomizer v1.0.7 (C) HSThrowaway5
         private void HandleLoadMocap(string path)
         {
             if(string.IsNullOrEmpty(path))
