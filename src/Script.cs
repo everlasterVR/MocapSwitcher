@@ -12,12 +12,9 @@ namespace MocapSwitcher
         private const string pluginName = "MocapSwitcher";
         private const string pluginVersion = "<Version>";
 
-        private Atom person;
         private Atom coreControl;
         private List<string> animationStorableIds;
-        private string pluginDataDir = SuperController.singleton.savesDir + @"PluginData\everlaster\MocapSwitcher\";
         private string mocapDir = SuperController.singleton.savesDir + @"mocap\";
-        private string tmpSceneFilePath;
         private string lastBrowseDir;
         private const string saveExt = "json";
 
@@ -31,12 +28,9 @@ namespace MocapSwitcher
                     return;
                 }
 
-                FileManagerSecure.CreateDirectory(pluginDataDir);
                 FileManagerSecure.CreateDirectory(mocapDir);
-                tmpSceneFilePath = pluginDataDir + "tmp.json";
                 lastBrowseDir = mocapDir;
 
-                person = containingAtom;
                 coreControl = SuperController.singleton.GetAtomByUid("CoreControl");
                 SetAnimationStorableIds();
 
@@ -51,7 +45,7 @@ namespace MocapSwitcher
         private void SetAnimationStorableIds()
         {
             animationStorableIds = new List<string>();
-            foreach(string id in person.GetStorableIDs())
+            foreach(string id in containingAtom.GetStorableIDs())
             {
                 if(id.EndsWith("Animation"))
                 {
@@ -121,54 +115,21 @@ namespace MocapSwitcher
                 return;
             }
             lastBrowseDir = path.Substring(0, path.LastIndexOfAny(new char[] { '/', '\\' })) + @"\";
-            LoadSaveJson(LoadJSON(path));
+            JSONClass mocap = LoadJSON(path).AsObject;
+            ClearPersonPoseAndAnimationData();
+            AddPersonPoseAndAnimationData(mocap["Person"].AsObject);
+            MergeMotionAnimationMasterData(mocap["CoreControl"].AsObject);
         }
 
-        private void LoadSaveJson(JSONNode mocap)
+        private void MergeMotionAnimationMasterData(JSONClass coreControlJson)
         {
-            JSONClass scene = SuperController.singleton.GetSaveJSON();
-            ModifyAndTmpSaveScene(scene, mocap);
-            SuperController.singleton.Load(tmpSceneFilePath);
-        }
-
-        private void ModifyAndTmpSaveScene(JSONClass scene, JSONNode mocap)
-        {
-            foreach(JSONNode atomJson in scene["atoms"].AsArray)
-            {
-                if(string.Equals(atomJson["id"], "CoreControl"))
-                {
-                    MergeMotionAnimationMasterData(atomJson, mocap["CoreControl"]);
-                }
-
-                if(string.Equals(atomJson["id"], person.uid))
-                {
-                    ClearPersonPoseAndAnimationData(atomJson);
-                    AddPersonPoseAndAnimationData(atomJson, mocap["Person"]);
-                }
-            }
-
-            SaveJSON(scene, tmpSceneFilePath);
-        }
-
-        private void MergeMotionAnimationMasterData(JSONNode atomJson, JSONNode mocapJson)
-        {
+            JSONClass motionAnimationMasterJson = FindMotionAnimationMasterData(coreControlJson);
             try
             {
-                JSONNode data = FindMotionAnimationMasterData(mocapJson);
-                foreach(JSONNode storable in atomJson["storables"].AsArray)
-                {
-                    if(string.Equals(storable["id"], "MotionAnimationMaster"))
-                    {
-                        storable["autoPlay"] = data["autoPlay"];
-                        storable["loop"] = data["loop"];
-                        storable["playbackCounter"] = "0";
-                        storable["startTimestep"] = "0";
-                        storable["stopTimestep"] = data["stopTimestep"];
-                        storable["loopbackTime"] = data["loopbackTime"];
-                        storable["playbackSpeed"] = data["playbackSpeed"];
-                        storable["recordedLength"] = data["recordedLength"];
-                    }
-                }
+                MotionAnimationMaster master = SuperController.singleton.motionAnimationMaster;
+                motionAnimationMasterJson["playbackCounter"] = "0";
+                motionAnimationMasterJson["startTimeStemp"] = "0";
+                master.RestoreFromJSON(motionAnimationMasterJson);
             }
             catch(Exception e)
             {
@@ -177,73 +138,70 @@ namespace MocapSwitcher
             return;
         }
 
-        private JSONNode FindMotionAnimationMasterData(JSONNode coreControl)
+        private void ClearPersonPoseAndAnimationData()
         {
-            foreach(JSONNode storable in coreControl["storables"].AsArray)
+            foreach(string storableId in animationStorableIds)
+            {
+                string controlStorableId = animationStorableIdToControlId(storableId);
+                JSONStorable controlStorable = containingAtom.GetStorableByID(controlStorableId);
+                controlStorable.RestoreAllFromDefaults();
+
+                try
+                {
+                    JSONStorable storable = containingAtom.GetStorableByID(storableId);
+                    storable.RestoreAllFromDefaults();
+                }
+                catch(Exception e)
+                {
+                    //Log.Message($"{e}");
+                }
+            }
+        }
+
+        private void AddPersonPoseAndAnimationData(JSONClass personJson)
+        {
+            foreach(string storableId in animationStorableIds)
+            {
+                string controlStorableId = animationStorableIdToControlId(storableId);
+                JSONStorable controlStorable = containingAtom.GetStorableByID(controlStorableId);
+                JSONClass controlJson = FindStorableFromPerson(personJson, controlStorableId);
+                controlStorable.RestoreFromJSON(controlJson);
+
+                JSONStorable storable = containingAtom.GetStorableByID(storableId);
+                try
+                {
+                    JSONClass json = FindStorableFromPerson(personJson, storableId);
+                    storable.RestoreFromJSON(json);
+                }
+                catch(Exception e)
+                {
+                    //Log.Message($"{e}");
+                }
+            }
+        }
+
+        private JSONClass FindMotionAnimationMasterData(JSONClass coreControlJson)
+        {
+            foreach(JSONNode storable in coreControlJson["storables"].AsArray)
             {
                 if(string.Equals(storable["id"], "MotionAnimationMaster"))
                 {
-                    return storable;
+                    return storable.AsObject;
                 }
             }
             throw new Exception("Selected mocap file does not contain MotionAnimationMaster data!");
         }
 
-        private void ClearPersonPoseAndAnimationData(JSONNode atomJson)
-        {
-            foreach(string id in animationStorableIds)
-            {
-                string controlStorableId = animationStorableIdToControlId(id);
-                JSONNode controlNode = FindStorableFromPerson(atomJson, controlStorableId);
-                atomJson["storables"].Remove(controlNode);
-
-                try
-                {
-                    JSONNode animationNode = FindStorableFromPerson(atomJson, id);
-                    atomJson["storables"].Remove(animationNode);
-                }
-                catch(Exception)
-                {
-#if SHOW_DEBUG
-                    Log.Message($"Cannot clear {id} data, not found in scene");
-#endif
-                }
-            }
-        }
-
-        private void AddPersonPoseAndAnimationData(JSONNode atomJson, JSONNode mocapJson)
-        {
-            foreach(string id in animationStorableIds)
-            {
-                string controlStorableId = animationStorableIdToControlId(id);
-                JSONNode controlNode = FindStorableFromPerson(mocapJson, controlStorableId);
-                atomJson["storables"].Add(controlNode);
-
-                try
-                {
-                    JSONNode animationNode = FindStorableFromPerson(mocapJson, id);
-                    atomJson["storables"].Add(animationNode);
-                }
-                catch(Exception)
-                {
-#if SHOW_DEBUG
-                    Log.Message($"Cannot add {id} data, not found in mocap JSON");
-#endif
-                }
-            }
-            return;
-        }
-
-        private JSONNode FindStorableFromPerson(JSONNode personData, string id)
+        private JSONClass FindStorableFromPerson(JSONNode personData, string id)
         {
             foreach(JSONNode storable in personData["storables"].AsArray)
             {
                 if(string.Equals(storable["id"], id))
                 {
-                    return storable;
+                    return storable.AsObject;
                 }
             }
-            throw new Exception();
+            throw new Exception($"Selected mocap file does not contain storable {id}");
         }
 
         // based on FloatMultiParamRandomizer v1.0.7 (C) HSThrowaway5
@@ -292,13 +250,13 @@ namespace MocapSwitcher
                 ["storables"] = new JSONArray()
             };
 
-            JSONStorable control = person.GetStorableByID("control");
+            JSONStorable control = containingAtom.GetStorableByID("control");
             json["storables"].Add(control.GetJSON());
 
             foreach(string id in animationStorableIds)
             {
-                JSONClass controlJson = person.GetStorableByID(animationStorableIdToControlId(id)).GetJSON();
-                JSONClass animationJson = person.GetStorableByID(id).GetJSON();
+                JSONClass controlJson = containingAtom.GetStorableByID(animationStorableIdToControlId(id)).GetJSON();
+                JSONClass animationJson = containingAtom.GetStorableByID(id).GetJSON();
                 if(animationJson["steps"].AsArray.Count > 0)
                 {
                     json["storables"].Add(animationJson);
