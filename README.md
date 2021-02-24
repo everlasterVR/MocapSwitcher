@@ -8,4 +8,4 @@ Fork this repository and create a pull request for your changes.
 
 ## License
 
-[MIT](https://github.com/everlasterVR/MocapSwitcher/blob/master/LICENSE
+[MIT](https://github.com/everlasterVR/MocapSwitcher/blob/master/LICENSE)
