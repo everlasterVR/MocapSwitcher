@@ -2,6 +2,7 @@
 using MVR.FileManagementSecure;
 using SimpleJSON;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -116,9 +117,18 @@ namespace MocapSwitcher
             }
             lastBrowseDir = path.Substring(0, path.LastIndexOfAny(new char[] { '/', '\\' })) + @"\";
             JSONClass mocap = LoadJSON(path).AsObject;
+
+            containingAtom.collisionEnabled = false;
             ClearPersonPoseAndAnimationData();
             AddPersonPoseAndAnimationData(mocap["Person"].AsObject);
             MergeMotionAnimationMasterData(mocap["CoreControl"].AsObject);
+            StartCoroutine(WaitEnableCollision());
+        }
+
+        private IEnumerator WaitEnableCollision()
+        {
+            yield return new WaitForSeconds(0.5f);
+            containingAtom.collisionEnabled = true;
         }
 
         private void MergeMotionAnimationMasterData(JSONClass coreControlJson)
