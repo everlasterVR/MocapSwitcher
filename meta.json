@@ -1,21 +1,21 @@
-{ 
-   "licenseType" : "CC BY-SA", 
-   "creatorName" : "everlaster", 
-   "packageName" : "MocapSwitcher", 
-   "standardReferenceVersionOption" : "Latest", 
-   "scriptReferenceVersionOption" : "Exact", 
-   "description" : "v<Version>. Save a mocap to file, load a mocap from file.", 
-   "credits" : "", 
-   "instructions" : "Load MocapSwitcher.cslist to a Person atom.", 
-   "promotionalLink" : "", 
-   "programVersion" : "1.20.77.8", 
-   "contentList" : [ 
-      "Custom/Scripts/everlaster/MocapSwitcher/MocapSwitcher.cslist", 
+{
+   "licenseType" : "CC BY-SA",
+   "creatorName" : "everlaster",
+   "packageName" : "MocapSwitcher",
+   "standardReferenceVersionOption" : "Latest",
+   "scriptReferenceVersionOption" : "Exact",
+   "description" : "v0.0.0. Save a mocap to file, load a mocap from file.",
+   "credits" : "",
+   "instructions" : "Load MocapSwitcher.cslist to a Person atom.",
+   "promotionalLink" : "https://patreon.com/everlaster",
+   "programVersion" : "1.20.77.8",
+   "contentList" : [
+      "Custom/Scripts/everlaster/MocapSwitcher/MocapSwitcher.cslist",
       "Custom/Scripts/everlaster/MocapSwitcher/src"
-   ], 
-   "dependencies" : { 
+   ],
+   "dependencies" : {
    },
-   "customOptions" : { 
+   "customOptions" : {
       "preloadMorphs" : "false"
    }
 }

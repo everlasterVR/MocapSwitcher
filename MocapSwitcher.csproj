@@ -90,6 +90,10 @@
     <None Include=".gitignore" />
     <None Include="meta.json" />
     <None Include="README.md" />
+    <None Include="todo.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="package.sh" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

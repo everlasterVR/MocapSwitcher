@@ -2,10 +2,10 @@
 
 Save a mocap to file, load a mocap from file.
 
-## Contributing
+**Download**: https://hub.virtamate.com/resources/mocapswitcher.3846/
 
-Fork this repository and create a pull request for your changes.
+**Support me at**: https://patreon.com/everlaster
 
 ## License
 
-[MIT](https://github.com/everlasterVR/MocapSwitcher/blob/master/LICENSE)
+[MIT](LICENSE)

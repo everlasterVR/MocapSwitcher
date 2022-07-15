@@ -11,7 +11,7 @@ namespace MocapSwitcher
     public class Script : MVRScript
     {
         private const string pluginName = "MocapSwitcher";
-        private const string pluginVersion = "<Version>";
+        private const string pluginVersion = "v0.0.0";
 
         private Atom coreControl;
         private List<string> animationStorableIds;
